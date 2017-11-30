@@ -17,7 +17,7 @@ _pinmode_to_rpi_mode = {
 
 class Header(object):
     """Controls initializing and cleaning up GPIO header."""
-    
+
     def __init__(self, mode=PinMode.BOARD):
         self._pinsForCleanup = []
         GPIO.setmode(_pinmode_to_rpi_mode[mode])
@@ -29,7 +29,7 @@ class Header(object):
         for pin in self._pinsForCleanup:
             pin.cleanup()
         GPIO.cleanup()
-    
+
     def registerPinForCleanup(self, pin):
         self._pinsForCleanup.append(pin)
 
@@ -118,18 +118,18 @@ class InputPin(object):
         event_kwargs = {}
         if bouncetime:
             event_kwargs['bouncetime'] = bouncetime
-        GPIO.add_event_detect(gpio=self._pin, edge=self._edge, **event_kwargs)
-
         if callable(callback):
-            GPIO.add_event_callback(self._pin, callback)
+            event_kwargs['callback'] = callback
+
+        GPIO.add_event_detect(gpio=self._pin, edge=self._edge, **event_kwargs)
 
         if header is not None:
             header.registerPinForCleanup(self)
-    
+
     def __del__(self):
         if self._header is None:
             self.cleanup()
-    
+
     def cleanup(self):
         GPIO.remove_event_detect(self._pin)
 
